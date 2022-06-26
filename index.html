@@ -8,24 +8,27 @@
     <title>Video to GIF Converter Tool in Browser Using FFMPEG WASM</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
+<style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
 
 <body>
-    <div class="container">
-        <h1 class="text-center">
-            Video to GIF Converter Using FFMPEG WASM
-        </h1>
-            <div class="form-group">
-                <input type="file" name="" id="files" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <button id="button" class="btn btn-danger btn-block">
-                    Compress Video
-                </button>
-                <button style="display: none;" id="again" class="btn btn-danger btn-block">
-                    Compress Another Video
-                </button>
-            </div>
+    <h3>Record video from webcam and transcode to mp4 (x264) and play!</h3>
+    <div>
+      <video id="webcam" width="320px" height="180px"></video>
+      <video id="output-video" width="320px" height="180px" controls></video>
     </div>
+    <button id="record" disabled>Start Recording</button>
+    <p id="message"></p>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
@@ -33,52 +36,49 @@
     //# sourceMappingURL=ffmpeg.min.js.map
 </script>
 <script>
-
-function getFileExtension(filename){
-
-// get file extension
-const extension = filename.split('.').pop();
-return extension;
-}
-
     const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ progress: (e) => {
-        $("#button").prop("disabled", "true")
-        $("#button").text("Processing Video " + Math.round(e.ratio * 100) + "%")
-    }});
-    const transcode = async ({ target: { files } }) => {
-        $("#button").prop("disabled", "true")
-        const { name } = files[0];
-        console.log(name)
-        console.log(getFileExtension(name))
-        await ffmpeg.load();
-        ffmpeg.FS('writeFile', name, await fetchFile(files[0]));
-        await ffmpeg.run('-i', name, '-c:v', 'h264', '-crf','28','-b:v', '0','-row-mt', '1', '-f', `${getFileExtension(name)}`, `out.${getFileExtension(name)}`);
-        const data = ffmpeg.FS('readFile', `out.${getFileExtension(name)}`);
-        console.log(data)
-        //const image = document.getElementById('img');
-        //image.src = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif'} ));
-        $("#again").show()
-        $("#files").val("")
-        $("#button").prop("disabled", "false")
-        $("#files").hide()
-        $("#button").hide()
-        let chunk = URL.createObjectURL(new Blob([data.buffer],{type:`video/${getFileExtension(name)}`}));
-        const link = document.createElement("a");
-        link.href = chunk
-        link.download = Date.now() + "." + `${getFileExtension(name)}`;
-        console.log(chunk)
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const ffmpeg = createFFmpeg({ log: true });
+
+    const webcam = document.getElementById('webcam');
+    const recordBtn = document.getElementById('record');
+    const startRecording = () => {
+      const rec = new MediaRecorder(webcam.srcObject);
+      const chunks = [];
+      
+      recordBtn.textContent = 'Stop Recording';
+      recordBtn.onclick = () => {
+        rec.stop();
+        recordBtn.textContent = 'Start Recording';
+        recordBtn.onclick = startRecording;
+      }
+
+      rec.ondataavailable = e => chunks.push(e.data);
+      rec.onstop = async () => {
+        transcode(new Uint8Array(await (new Blob(chunks)).arrayBuffer()));
+      };
+      rec.start();
+    };
+
+    (async () => {
+      webcam.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      await webcam.play();
+      recordBtn.disabled = false;
+      recordBtn.onclick = startRecording;
+    })();
+
+    const transcode = async (webcamData) => {
+      const message = document.getElementById('message');
+      const name = 'record.webm';
+      message.innerHTML = 'Loading ffmpeg-core.js';
+      await ffmpeg.load();
+      message.innerHTML = 'Start transcoding';
+      ffmpeg.FS('writeFile', name, await fetchFile(webcamData));
+      await ffmpeg.run('-i', name,  'output.mp4');
+      message.innerHTML = 'Complete transcoding';
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+
+      const video = document.getElementById('output-video');
+      video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
     }
-
-    document
-        .getElementById('files').addEventListener('change', transcode);
-
-    $("#again").click((e) => {
-        location.reload()
-    })
-</script>
-
+  </script>
 </html>
