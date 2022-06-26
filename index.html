@@ -9,26 +9,30 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%
-    }
+    html,
     body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+        margin: 0;
+        width: 100%;
+        height: 100%
     }
-  </style>
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+</style>
 
 <body>
-    <h3>Record video from webcam and transcode to mp4 (x264) and play!</h3>
-    <div>
-      <video id="webcam" width="1280px" height="720px"></video>
-      <video style="display: none;" id="output-video" width="320px" height="180px" controls></video>
+    <div class="container">
+        <h1 class="text-center">Record Video From Webcam Online</h1>
+        <video id="webcam" width="500px" height="200px"></video>
+        <video style="display: none;" id="output-video" width="320px" height="180px" controls></video>
+    <div class="form-group">
+        <button class="btn btn-danger btn-block" id="record" disabled>Start Recording</button>
+        <button style="display:none;" id="again">Record Again</button>
     </div>
-    <button id="record" disabled>Start Recording</button>
-    <p id="message"></p>
+    </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
@@ -42,50 +46,53 @@
     const webcam = document.getElementById('webcam');
     const recordBtn = document.getElementById('record');
     const startRecording = () => {
-      const rec = new MediaRecorder(webcam.srcObject);
-      const chunks = [];
-      
-      recordBtn.textContent = 'Stop Recording';
-      recordBtn.onclick = () => {
-        rec.stop();
-        recordBtn.textContent = 'Start Recording';
-        recordBtn.onclick = startRecording;
-      }
+        const rec = new MediaRecorder(webcam.srcObject);
+        const chunks = [];
 
-      rec.ondataavailable = e => chunks.push(e.data);
-      rec.onstop = async () => {
-        transcode(new Uint8Array(await (new Blob(chunks)).arrayBuffer()));
-      };
-      rec.start();
+        recordBtn.textContent = 'Stop Recording';
+        recordBtn.onclick = () => {
+            rec.stop();
+            recordBtn.textContent = 'Start Recording';
+            recordBtn.onclick = startRecording;
+        }
+
+        rec.ondataavailable = e => chunks.push(e.data);
+        rec.onstop = async () => {
+            transcode(new Uint8Array(await (new Blob(chunks)).arrayBuffer()));
+        };
+        rec.start();
     };
 
     (async () => {
-      webcam.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      await webcam.play();
-      recordBtn.disabled = false;
-      recordBtn.onclick = startRecording;
+        webcam.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        await webcam.play();
+        recordBtn.disabled = false;
+        recordBtn.onclick = startRecording;
     })();
 
     const transcode = async (webcamData) => {
-      const message = document.getElementById('message');
-      const name = 'record.webm';
-      message.innerHTML = 'Loading ffmpeg-core.js';
-      await ffmpeg.load();
-      message.innerHTML = 'Start transcoding';
-      ffmpeg.FS('writeFile', name, await fetchFile(webcamData));
-      await ffmpeg.run('-i', name,  'output.mp4');
-      message.innerHTML = 'Complete transcoding';
-      const data = ffmpeg.FS('readFile', 'output.mp4');
+        const name = 'record.webm';
+        await ffmpeg.load();
+        ffmpeg.FS('writeFile', name, await fetchFile(webcamData));
+        await ffmpeg.run('-i', name, 'output.mp4');
+        const data = ffmpeg.FS('readFile', 'output.mp4');
 
-      const video = document.getElementById('output-video');
-      video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-      link.download=Date.now() + ".mp4"
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+        const video = document.getElementById('output-video');
+        video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+        $("#button").hide()
+        $("#webcam").hide()
+        $("#again").show()
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+        link.download = Date.now() + ".mp4"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
-  </script>
+
+    $("#again").click(function(){
+        location.reload()
+    })
+</script>
+
 </html>
