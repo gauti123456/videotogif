@@ -44,7 +44,7 @@ return extension;
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ progress: (e) => {
         $("#button").prop("disabled", "true")
-        $("#button").text("Processing Video " + Math.round((e.ratio + Number.EPSILON) * 100) / 100 + "%")
+        $("#button").text("Processing Video " + Math.round(e.ratio * 100) + "%")
     }});
     const transcode = async ({ target: { files } }) => {
         $("#button").prop("disabled", "true")
