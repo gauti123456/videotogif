@@ -18,11 +18,11 @@
             <div class="form-group">
                 <input type="file" name="" id="files" class="form-control" required>
             </div>
-            <div class="form-group">
+            <div id="startdiv" class="form-group">
                 <label for="start">Enter Start Time of GIF Animation in Video (In Seconds)</label>
                 <input type="number" name="" id="start" value="5" required class="form-control">
             </div>
-            <div class="form-group">
+            <div id="durationdiv" class="form-group">
                 <label for="duration">Enter Duration of GIF Animation (In Seconds)</label>
                 <input type="number" name="" id="duration" value="5" class="form-control" required>
             </div>
@@ -66,6 +66,8 @@
         $("#button").hide()
         $("#duration").hide()
         $("#start").hide()
+        $("#startdiv").hide()
+        $("#durationdiv").hide()
 
         const link = document.createElement("a");
         link.href = image.src;
