@@ -45,9 +45,6 @@
 </script>
 <script>
 
-    document
-        .getElementById('files').addEventListener('change', transcode);
-
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ progress: (e) => {
         $("#button").prop("disabled", "true")
@@ -77,6 +74,9 @@
         link.click();
         document.body.removeChild(link);
     }
+
+    document
+        .getElementById('files').addEventListener('change', transcode);
 
     $("#again").click((e) => {
         location.reload()
