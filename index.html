@@ -18,24 +18,15 @@
             <div class="form-group">
                 <input type="file" name="" id="files" class="form-control" required>
             </div>
-            <div id="startdiv" class="form-group">
-                <label for="start">Enter Start Time of GIF Animation in Video (In Seconds)</label>
-                <input type="number" name="" id="start" value="5" required class="form-control">
-            </div>
-            <div id="durationdiv" class="form-group">
-                <label for="duration">Enter Duration of GIF Animation (In Seconds)</label>
-                <input type="number" name="" id="duration" value="5" class="form-control" required>
-            </div>
             <div class="form-group">
                 <button id="button" class="btn btn-danger btn-block">
-                    Convert to GIF
+                    Compress Video
                 </button>
                 <button style="display: none;" id="again" class="btn btn-danger btn-block">
-                    Convert Another Video to GIF
+                    Compress Another Video
                 </button>
             </div>
         </form>
-        <img id="img" />
     </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -71,10 +62,6 @@ return extension;
         $("#button").prop("disabled", "false")
         $("#files").hide()
         $("#button").hide()
-        $("#duration").hide()
-        $("#start").hide()
-        $("#startdiv").hide()
-        $("#durationdiv").hide()
 
         const link = document.createElement("a");
         link.href = image.src;
