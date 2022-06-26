@@ -14,7 +14,6 @@
         <h1 class="text-center">
             Video to GIF Converter Using FFMPEG WASM
         </h1>
-        <form id="form">
             <div class="form-group">
                 <input type="file" name="" id="files" class="form-control" required>
             </div>
@@ -26,7 +25,6 @@
                     Compress Another Video
                 </button>
             </div>
-        </form>
     </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -51,10 +49,13 @@ return extension;
     const transcode = async ({ target: { files } }) => {
         $("#button").prop("disabled", "true")
         const { name } = files[0];
+        console.log(name)
+        console.log(getFileExtension(name))
         await ffmpeg.load();
         ffmpeg.FS('writeFile', name, await fetchFile(files[0]));
         await ffmpeg.run('-i', name, '-c:v', 'libvpx-vp9', '-crf',28, '-f', `${getFileExtension(name)}`, `out.${getFileExtension(name)}`);
         const data = ffmpeg.FS('readFile', `out.${getFileExtension(name)}`);
+        console.log(data)
         //const image = document.getElementById('img');
         //image.src = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif'} ));
         $("#again").show()
@@ -62,10 +63,11 @@ return extension;
         $("#button").prop("disabled", "false")
         $("#files").hide()
         $("#button").hide()
-
+        let chunk = URL.createObjectURL(new Blob([data.buffer],{type:`video/${getFileExtension(name)}`}));
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([data.buffer],{type:`video/${getFileExtension(name)}`}));
+        link.href = chunk
         link.download = Date.now() + "." + `${getFileExtension(name)}`;
+        console.log(chunk)
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
