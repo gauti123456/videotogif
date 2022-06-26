@@ -45,6 +45,13 @@
 </script>
 <script>
 
+function getFileExtension(filename){
+
+// get file extension
+const extension = filename.split('.').pop();
+return extension;
+}
+
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ progress: (e) => {
         $("#button").prop("disabled", "true")
@@ -55,10 +62,10 @@
         const { name } = files[0];
         await ffmpeg.load();
         ffmpeg.FS('writeFile', name, await fetchFile(files[0]));
-        await ffmpeg.run('-i', name, '-t', $("#duration").val(), '-ss',$("#start").val(), '-f', 'gif', 'out.gif');
-        const data = ffmpeg.FS('readFile', 'out.gif');
-        const image = document.getElementById('img');
-        image.src = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
+        await ffmpeg.run('-i', name, '-vcodec', 'libvpx-vp9', '-crf',28, '-f', `${getFileExtension(name)}`, `out.${getFileExtension(name)}`);
+        const data = ffmpeg.FS('readFile', `out.${getFileExtension(name)}`);
+        //const image = document.getElementById('img');
+        //image.src = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif'} ));
         $("#again").show()
         $("#files").val("")
         $("#button").prop("disabled", "false")
@@ -71,7 +78,7 @@
 
         const link = document.createElement("a");
         link.href = image.src;
-        link.download = Date.now() + ".gif";
+        link.download = Date.now() + "." + `${getFileExtension(name)}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
