@@ -53,7 +53,7 @@ return extension;
         console.log(getFileExtension(name))
         await ffmpeg.load();
         ffmpeg.FS('writeFile', name, await fetchFile(files[0]));
-        await ffmpeg.run('-i', name, '-c:v', 'x264', '-crf','28', '-f', `${getFileExtension(name)}`, `out.${getFileExtension(name)}`);
+        await ffmpeg.run('-i', name, '-c:v', 'h264', '-crf','28', '-f', `${getFileExtension(name)}`, `out.${getFileExtension(name)}`);
         const data = ffmpeg.FS('readFile', `out.${getFileExtension(name)}`);
         console.log(data)
         //const image = document.getElementById('img');
