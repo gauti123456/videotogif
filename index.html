@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <h3>Upload multiple videos to concat to mp4 (x264) and play!</h3>
+    <h3>Select multiple video files to Concatenate</h3>
     <video id="output-video" controls></video><br />
     <input type="file" id="uploader" multiple />
     <p id="message"></p>
@@ -21,50 +21,33 @@
     //# sourceMappingURL=ffmpeg.min.js.map
 </script>
 <script>
-    const message = document.getElementById("message");
-    const { createFFmpeg } = FFmpeg;
+    const { createFFmpeg, fetchFile } = FFmpeg;
+      const ffmpeg = createFFmpeg({ log: true });
 
-    const worker = createFFmpeg({
-        progress: ({ ratio }) => {
-            message.innerHTML = `Complete: ${(ratio * 100.0).toFixed(2)}%`;
-        }
-    });
-
-    const concat = async ({ target: { files } }) => {
+      const transcode = async ({ target: { files } }) => {
+        const message = document.getElementById("message");
         message.innerHTML = "Loading ffmpeg-core.js";
-        await worker.load();
-
-        let listTxt = ``;
-        for (const f of files) {
-            const { name } = f;
-            listTxt += `file '/${name}'
-`;
+        await ffmpeg.load();
+        message.innerHTML = "Start Concating";
+        const inputPaths = [];
+        for (const file of files) {
+          const { name } = file;
+          ffmpeg.FS('writeFile', name, await fetchFile(file));
+          inputPaths.push(`file ${name}`);
         }
-        await worker.FS("writeFile", "mylist.txt", listTxt);
-
-        // const res = await worker.read("mylist.txt");
-        // var string = new TextDecoder("utf-8").decode(res.data);
-        // console.log("txt", res, string);
-
-        message.innerHTML = "Start concating";
-        await worker.run(`-f concat -safe 0 -i mylist.txt -c copy output.mp4`);
-        message.innerHTML = "Complete concating";
-        const data = await worker.FS("readFile", "output.mp4");
-
+        ffmpeg.FS('writeFile', 'concat_list.txt', inputPaths.join('\n'));
+        await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', 'output.mp4');
+        message.innerHTML = "Complete Concating";
+        const data = ffmpeg.FS('readFile', 'output.mp4');
         const video = document.getElementById("output-video");
         video.src = URL.createObjectURL(
-            new Blob([data.buffer], { type: "video/mp4" })
+          new Blob([data.buffer], {
+            type: "video/mp4"
+          })
         );
-        const link = document.createElement("a");
-        link.href = video.src
-        link.download = Date.now() + ".mp4"
-        console.log(chunk)
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    document.getElementById("uploader").addEventListener("change", concat);
+      };
+      const elm = document.getElementById("uploader");
+      elm.addEventListener("change", transcode);
 
 </script>
 
