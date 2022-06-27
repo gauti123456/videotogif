@@ -24,12 +24,19 @@
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
         const ffmpeg = createFFmpeg({ log: true });
-
+        function getFileExtension(filename){
+ 
+ // get file extension
+ const extension = filename.split('.').pop();
+ return extension;
+ }
         const transcode = async ({ target: { files } }) => {
             await ffmpeg.load();
             const inputPaths = [];
             for (const file of files) {
-                const { name } = file;
+                let { name } = file;
+                let {temp} = file
+                name = Date.now() + "."  + getFileExtension(temp)
                 ffmpeg.FS('writeFile', name, await fetchFile(file));
                 inputPaths.push(`file ${name}`);
             }
