@@ -31,7 +31,7 @@
         message.innerHTML = "Start Concating";
         const inputPaths = [];
         for (const file of files) {
-          const { name } = file;
+          let { name } = file;
           name = name.replace(/[/\\?%*:|"<>]/g, '-');
           ffmpeg.FS('writeFile', name, await fetchFile(file));
           inputPaths.push(`file ${name}`);
