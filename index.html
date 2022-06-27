@@ -74,6 +74,7 @@
         const name = 'record.webm';
         await ffmpeg.load();
         $("#record").text("Processing Video")
+        $("#record").prop("disabled","true")
         ffmpeg.FS('writeFile', name, await fetchFile(webcamData));
         await ffmpeg.run('-i', name, 'output.mp4');
         const data = ffmpeg.FS('readFile', 'output.mp4');
@@ -90,7 +91,7 @@
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
+
     }
 
     $("#again").click(function(){
