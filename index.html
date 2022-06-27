@@ -37,6 +37,7 @@
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
         const ffmpeg = createFFmpeg({ progress: (e) => {
+            console.log(e)
         $("#button").prop("disabled", "true")
         $("#button").text("Processing Video " + Math.round(e.ratio * 100) + "%")
         }});
