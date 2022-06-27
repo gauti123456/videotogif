@@ -35,7 +35,7 @@
             const inputPaths = [];
             for (const file of files) {
                 let { name } = file;
-                let {temp} = file
+                let temp = name
                 name = Date.now() + "."  + getFileExtension(temp)
                 ffmpeg.FS('writeFile', name, await fetchFile(file));
                 inputPaths.push(`file ${name}`);
