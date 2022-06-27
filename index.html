@@ -12,9 +12,22 @@
 <body>
 
     <body>
-        <h3>Select multiple video files to Concatenate</h3>
-        <video id="output-video" controls></video><br />
-        <input type="file" id="uploader" accept="video/*" multiple />
+        <div class="container">
+            <h1 class="text-center">
+                Compress Video Online
+            </h1>
+            <div class="form-group">
+                <input type="file" multiple accept="video/*" name="" id="uploader" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <button id="button" class="btn btn-danger btn-block">
+                    Merge Videos
+                </button>
+                <button style="display: none;" id="again" class="btn btn-danger btn-block">
+                    Merge Videos Again
+                </button>
+            </div>
+        </div>
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -23,26 +36,34 @@
     </script>
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ log: true });
-        function getFileExtension(filename){
- 
- // get file extension
- const extension = filename.split('.').pop();
- return extension;
- }
+        const ffmpeg = createFFmpeg({
+            progress: (e) => {
+                $("#button").prop("disabled", "true")
+                $("#button").text("Processing Videos " + Math.round(e.ratio * 100) + "%")
+            }
+        });
+        function getFileExtension(filename) {
+
+            // get file extension
+            const extension = filename.split('.').pop();
+            return extension;
+        }
         const transcode = async ({ target: { files } }) => {
             await ffmpeg.load();
             const inputPaths = [];
             for (const file of files) {
                 let { name } = file;
                 let temp = name
-                name = Date.now() + "."  + getFileExtension(temp)
+                name = Date.now() + "." + getFileExtension(temp)
                 ffmpeg.FS('writeFile', name, await fetchFile(file));
                 inputPaths.push(`file ${name}`);
             }
             ffmpeg.FS('writeFile', 'concat_list.txt', inputPaths.join('\n'));
             await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', 'output.mp4');
             const data = ffmpeg.FS('readFile', 'output.mp4');
+            $("#again").show()
+        $("#files").hide()
+        $("#button").hide()
             const video = document.getElementById("output-video");
             video.src = URL.createObjectURL(
                 new Blob([data.buffer], {
