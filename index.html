@@ -10,10 +10,22 @@
 </head>
 
 <body>
-    <h3>Select multiple video files to Concatenate</h3>
-    <video id="output-video" controls></video><br />
-    <input type="file" id="uploader" multiple />
-    <p id="message"></p>
+    <div class="container">
+        <h1 class="text-center">
+            Compress Video Online
+        </h1>
+        <div class="form-group">
+            <input type="file" accept="video/*" name="" id="files" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <button id="button" class="btn btn-danger btn-block">
+                Merge Videos
+            </button>
+            <button style="display: none;" id="again" class="btn btn-danger btn-block">
+                Merge Videos Again
+            </button>
+        </div>
+    </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
@@ -22,33 +34,47 @@
 </script>
 <script>
     const { createFFmpeg, fetchFile } = FFmpeg;
-      const ffmpeg = createFFmpeg({ log: true });
+    const ffmpeg = createFFmpeg({
+        progress: (e) => {
+            $("#button").prop("disabled", "true")
+            $("#button").text("Processing Videos " + Math.round(e.ratio * 100) + "%")
+        }
+    });
 
-      const transcode = async ({ target: { files } }) => {
-        const message = document.getElementById("message");
-        message.innerHTML = "Loading ffmpeg-core.js";
+    const transcode = async ({ target: { files } }) => {
         await ffmpeg.load();
-        message.innerHTML = "Start Concating";
         const inputPaths = [];
         for (const file of files) {
-          let { name } = file;
-          name = name.replace(/([^a-z0-9\s]+)/gi, '-');
-          ffmpeg.FS('writeFile', name, await fetchFile(file));
-          inputPaths.push(`file ${name}`);
+            let { name } = file;
+            ffmpeg.FS('writeFile', name, await fetchFile(file));
+            inputPaths.push(`file ${name}`);
         }
         ffmpeg.FS('writeFile', 'concat_list.txt', inputPaths.join('\n'));
         await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', 'output.mp4');
-        message.innerHTML = "Complete Concating";
         const data = ffmpeg.FS('readFile', 'output.mp4');
+        $("#again").show()
+        $("#files").hide()
+        $("#button").hide()
         const video = document.getElementById("output-video");
         video.src = URL.createObjectURL(
-          new Blob([data.buffer], {
-            type: "video/mp4"
-          })
+            new Blob([data.buffer], {
+                type: "video/mp4"
+            })
         );
-      };
-      const elm = document.getElementById("uploader");
-      elm.addEventListener("change", transcode);
+
+        const link = document.createElement("a");
+        link.href = video.src
+        link.download = Date.now() + "." + `${getFileExtension(name)}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+    const elm = document.getElementById("uploader");
+    elm.addEventListener("change", transcode);
+
+    $("#again").click(function () {
+        location.reload()
+    })
 
 </script>
 
