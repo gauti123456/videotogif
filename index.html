@@ -38,7 +38,7 @@
         const { createFFmpeg, fetchFile } = FFmpeg;
         const ffmpeg = createFFmpeg({ progress: (e) => {
         $("#button").prop("disabled", "true")
-        $("#button").text("Processing Video " + Math.round(e.time * 100) + "%")
+        $("#button").text("Processing Video in Seconds " + e.time)
         }});
         function getFileExtension(filename) {
 
