@@ -36,12 +36,10 @@
     </script>
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({
-            progress: (e) => {
-                $("#button").prop("disabled", "true")
-                $("#button").text("Processing Videos " + Math.round(e.ratio * 100) + "%")
-            }
-        });
+        const ffmpeg = createFFmpeg({ progress: (e) => {
+        $("#button").prop("disabled", "true")
+        $("#button").text("Processing Video " + Math.round(e.ratio * 100) + "%")
+        }});
         function getFileExtension(filename) {
 
             // get file extension
@@ -62,7 +60,7 @@
             await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', 'output.mp4');
             const data = ffmpeg.FS('readFile', 'output.mp4');
             $("#again").show()
-        $("#files").hide()
+        $("#uploader").hide()
         $("#button").hide()
         
             const link = document.createElement("a");
@@ -71,7 +69,7 @@
                     type: "video/mp4"
                 })
             );
-            link.download = Date.now() + "." + `${getFileExtension(name)}`;
+            link.download = Date.now() + ".mp4";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
