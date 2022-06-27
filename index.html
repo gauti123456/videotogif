@@ -46,7 +46,7 @@ const concat = async ({ target: { files } }) => {
   // console.log("txt", res, string);
   
   message.innerHTML = "Start concating";
-  await worker.run(`-f concat -safe 0 -i mylist.txt -c copy output.wav`);
+  await worker.run(`-f concat -safe 0 -i mylist.txt -c copy output.mp4`);
   message.innerHTML = "Complete concating";
   const { data } = await worker.FS("readFile","output.mp4");
 
