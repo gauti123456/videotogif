@@ -64,14 +64,13 @@
             $("#again").show()
         $("#files").hide()
         $("#button").hide()
-            const video = document.getElementById("output-video");
-            video.src = URL.createObjectURL(
+        
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(
                 new Blob([data.buffer], {
                     type: "video/mp4"
                 })
             );
-            const link = document.createElement("a");
-            link.href = video.src
             link.download = Date.now() + "." + `${getFileExtension(name)}`;
             document.body.appendChild(link);
             link.click();
