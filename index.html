@@ -32,7 +32,7 @@
         const inputPaths = [];
         for (const file of files) {
           let { name } = file;
-          name = name.replace(/[/\\?%*:|"<>]/g, '-');
+          name = name.replace(/([^a-z0-9\s]+)/gi, '-');
           ffmpeg.FS('writeFile', name, await fetchFile(file));
           inputPaths.push(`file ${name}`);
         }
