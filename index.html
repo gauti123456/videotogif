@@ -21,9 +21,9 @@
 </script>
 <script>
     const message = document.getElementById("message");
-const { createWorker } = FFmpeg;
+const { createFFmpeg } = FFmpeg;
 
-const worker = createWorker({
+const worker = createFFmpeg({
   progress: ({ ratio }) => {
     message.innerHTML = `Complete: ${(ratio * 100.0).toFixed(2)}%`;
   }
